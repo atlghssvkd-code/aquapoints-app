@@ -10,6 +10,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Logo from '@/components/icons/Logo';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import LoginForm from './login-form';
+import SignUpForm from './signup-form';
 
 export default function LoginPage() {
   return (
@@ -34,7 +37,7 @@ export default function LoginPage() {
       </div>
 
       <div className="z-10 p-8 w-full max-w-md">
-      <div className="flex justify-center items-center gap-4 mb-6">
+        <div className="flex justify-center items-center gap-4 mb-6">
           <Link href="/" className="flex items-center gap-4">
             <Logo className="h-12 w-12 text-primary" />
             <h1 className="text-4xl font-bold text-primary-dark tracking-tighter font-headline">
@@ -44,24 +47,25 @@ export default function LoginPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>Welcome</CardTitle>
             <CardDescription>
-              Enter your credentials to access your portal.
+              Sign in or create an account to get started.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="student@school.edu" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                <Button asChild className="w-full">
-                    <Link href="/dashboard">Login as Student</Link>
-                </Button>
+          <CardContent>
+            <Tabs defaultValue="login">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <LoginForm />
+              </TabsContent>
+              <TabsContent value="signup">
+                <SignUpForm />
+              </TabsContent>
+            </Tabs>
+            <div className="flex flex-col gap-2 pt-4">
                 <Button asChild variant="secondary" className="w-full">
                     <Link href="/admin">Login as Admin</Link>
                 </Button>
