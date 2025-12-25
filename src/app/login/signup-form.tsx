@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useTransition } from "react";
@@ -5,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { FirebaseError } from "firebase/app";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,10 +53,26 @@ export default function SignUpForm() {
         router.push("/dashboard");
       } catch (error) {
         console.error("Sign up failed:", error);
+        let description = "An unexpected error occurred. Please try again.";
+        if (error instanceof FirebaseError) {
+            switch (error.code) {
+                case "auth/email-already-in-use":
+                    description = "This email address is already in use by another account.";
+                    break;
+                case "auth/weak-password":
+                    description = "The password is too weak. Please use a stronger password.";
+                    break;
+                case "auth/invalid-email":
+                    description = "The email address is not valid.";
+                    break;
+                default:
+                    description = "Failed to create an account. Please try again later.";
+            }
+        }
         toast({
           variant: "destructive",
           title: "Sign Up Failed",
-          description: "This email might already be in use.",
+          description: description,
         });
       }
     });
