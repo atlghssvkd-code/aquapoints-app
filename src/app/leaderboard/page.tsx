@@ -18,11 +18,7 @@ export default function LeaderboardPage() {
     const leaderboardQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         // This is a collection group query, which queries all 'profile' subcollections.
-        return query(
-          collection(firestore, 'users'), 
-          orderBy("hydroPoints", "desc"), 
-          limit(10)
-        );
+        return query(collection(firestore, 'users'), orderBy("hydroPoints", "desc"), limit(10));
     }, [firestore]);
 
     const { data: leaderboardData, isLoading } = useCollection<Student>(leaderboardQuery);
