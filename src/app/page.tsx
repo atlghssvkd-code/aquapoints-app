@@ -37,44 +37,13 @@ export default function Home() {
           Stay hydrated, earn points, and build healthy habits. Your journey to better hydration starts here.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          <Card className="hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-3 bg-accent/30 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-graduation-cap h-6 w-6 text-primary"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.084a1 1 0 0 0 0 1.838l8.57 3.908a2 2 0 0 0 1.66 0l8.59-3.908Z"/><path d="M6 12v5c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-5"/><path d="M6 12.25 12 9l6 3.25"/></svg>
-                </div>
-                <span className="text-2xl font-headline">Student Portal</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">Track your water intake, complete challenges, and climb the leaderboard.</p>
-              <Button asChild className="w-full" size="lg">
-                <Link href="/dashboard">
-                  Enter Dashboard <ArrowRight className="ml-2" />
+        <div className="flex justify-center">
+            <Button asChild size="lg">
+                <Link href="/login">
+                    Login or Sign Up
+                    <ArrowRight className="ml-2" />
                 </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                 <div className="p-3 bg-accent/30 rounded-full">
-                  <ShieldCheck className="h-6 w-6 text-primary" />
-                </div>
-                <span className="text-2xl font-headline">Admin Dashboard</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">Manage stations, monitor hydration trends, and award points.</p>
-              <Button asChild className="w-full" variant="secondary" size="lg">
-                <Link href="/admin">
-                  Admin Login <ArrowRight className="ml-2" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+            </Button>
         </div>
       </div>
     </main>
