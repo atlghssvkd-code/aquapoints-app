@@ -1,3 +1,4 @@
+'use client';
 import HydrationTrendsChart from "@/components/admin/HydrationTrendsChart";
 import StationStatusTable from "@/components/admin/StationStatusTable";
 import QuickActionsCard from "@/components/admin/QuickActionsCard";

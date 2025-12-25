@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -19,7 +19,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/icons/Logo";
-import { currentUser } from "@/lib/data";
+import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { signOut } from "@/lib/auth";
+import { doc } from "firebase/firestore";
+import { Student } from "@/lib/types";
+import { Skeleton } from "./ui/skeleton";
 
 export type NavItem = {
   href: string;
@@ -35,11 +39,46 @@ interface AppShellProps {
 export function AppShell({ children, navItems }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
   const isAdmin = pathname.startsWith('/admin');
-  const userName = isAdmin ? 'Admin' : currentUser.name;
-  const userRole = isAdmin ? 'Administrator' : 'Student';
 
+  const userProfileRef = useMemoFirebase(() => {
+    if (!user || isAdmin) return null;
+    return doc(firestore, 'users', user.uid, 'profile', user.uid);
+  }, [firestore, user, isAdmin]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<Student>(userProfileRef);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const getUserName = () => {
+    if (isAdmin) return 'Admin';
+    if (isProfileLoading || isUserLoading) return 'Loading...';
+    if (userProfile) return `${userProfile.firstName} ${userProfile.lastName}`;
+    if (user) return user.email;
+    return 'Guest';
+  };
+  
+  const getUserRole = () => {
+      if (isAdmin) return 'Administrator';
+      return 'Student';
+  }
+
+  const getAvatarFallback = () => {
+      const name = getUserName();
+      if (name === 'Loading...' || name === 'Guest') return <UserIcon/>;
+      return name.charAt(0);
+  }
 
   return (
     <SidebarProvider>
@@ -71,15 +110,21 @@ export function AppShell({ children, navItems }: AppShellProps) {
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                {!isAdmin && <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />}
-                <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+                {isUserLoading || isProfileLoading ? (
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                ) : (
+                  <>
+                  <AvatarImage src={userProfile?.avatarUrl} alt={getUserName()} data-ai-hint={userProfile?.avatarHint} />
+                  <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
+                  </>
+                )}
               </Avatar>
               <div className="flex flex-col text-sm">
-                <span className="font-semibold">{userName}</span>
-                <span className="text-muted-foreground text-xs">{userRole}</span>
+                <span className="font-semibold">{getUserName()}</span>
+                <span className="text-muted-foreground text-xs">{getUserRole()}</span>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

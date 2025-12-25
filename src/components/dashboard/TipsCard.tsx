@@ -20,10 +20,12 @@ export default function TipsCard({ user }: { user: Student }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!user) return;
+    
     const fetchTip = async () => {
       setIsLoading(true);
       setError(null);
-      const progress = Math.round((user.currentIntake / user.dailyGoal) * 100);
+      const progress = user.dailyGoal > 0 ? Math.round((user.currentIntake / user.dailyGoal) * 100) : 0;
       const result = await getTipsAction({
         studentId: user.id,
         dailyProgressPercentage: progress,

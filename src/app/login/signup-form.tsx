@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useTransition } from "react";
@@ -21,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { signUp } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import { useAuth, useFirestore } from "@/firebase";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -32,6 +32,8 @@ export default function SignUpForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const auth = useAuth();
+  const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +47,7 @@ export default function SignUpForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       try {
-        await signUp(values.email, values.password, values.name);
+        await signUp(auth, firestore, values.email, values.password, values.name);
         toast({
           title: "Sign Up Successful",
           description: "Your account has been created.",

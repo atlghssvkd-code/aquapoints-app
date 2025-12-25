@@ -1,13 +1,26 @@
+'use client';
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { hydroStations } from "@/lib/data";
+import { HydroStation } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MapPage() {
     const mapImage = PlaceHolderImages.find(img => img.id === 'map');
+    const firestore = useFirestore();
+
+    const hydroStationsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'hydro_stations');
+    }, [firestore]);
+
+    const { data: hydroStations, isLoading } = useCollection<HydroStation>(hydroStationsQuery);
+
 
     const getStatusVariant = (status: 'Online' | 'Offline' | 'Error') => {
         switch (status) {
@@ -62,16 +75,24 @@ export default function MapPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {hydroStations.map(station => (
+                            {isLoading ? (
+                                Array.from({length: 5}).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (hydroStations || []).map(station => (
                                 <TableRow key={station.id}>
-                                    <TableCell className="font-medium">{station.location}</TableCell>
+                                    <TableCell className="font-medium">{station.name}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(station.status)} className={cn(station.status === 'Online' && 'bg-green-500/80 text-white')}>
                                             {station.status}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <a href="#" className="text-primary hover:underline">Get Directions</a>
+                                        <a href={`https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Get Directions</a>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -79,7 +100,6 @@ export default function MapPage() {
                     </Table>
                 </CardContent>
             </Card>
-
         </div>
     );
 }

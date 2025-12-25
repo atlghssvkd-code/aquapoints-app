@@ -20,7 +20,7 @@ import { Droplet, Target } from "lucide-react";
 
 export default function HydrationProgressCard({ user }: { user: Student }) {
   const { currentIntake, dailyGoal } = user;
-  const progress = Math.min(Math.round((currentIntake / dailyGoal) * 100), 100);
+  const progress = dailyGoal > 0 ? Math.min(Math.round((currentIntake / dailyGoal) * 100), 100) : 0;
 
   const chartData = [
     { name: "progress", value: progress, fill: "hsl(var(--primary))" },

@@ -1,35 +1,29 @@
-import {NextRequest, NextResponse} from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const PROTECTED_ROUTES = ['/dashboard', '/leaderboard', '/map'];
 const ADMIN_ROUTES = ['/admin'];
-const PUBLIC_ROUTES = ['/login', '/'];
 
 export function middleware(request: NextRequest) {
-  const {pathname} = request.nextUrl;
-  const sessionCookie = request.cookies.get('firebase-session');
+  const { pathname } = request.nextUrl;
+  const sessionToken = request.cookies.get('firebase-session-token');
 
-  // If trying to access a protected route without a session, redirect to login
-  if (PROTECTED_ROUTES.some(path => pathname.startsWith(path)) && !sessionCookie) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+  // If user tries to access login page while logged in, redirect to dashboard
+  if (pathname.startsWith('/login') && sessionToken) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If trying to access an admin route without a session, redirect to login
-  if (ADMIN_ROUTES.some(path => pathname.startsWith(path)) && !sessionCookie) {
-    // In a real app, you'd also check for an admin role here
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+  // Protect student routes
+  if (PROTECTED_ROUTES.some(path => pathname.startsWith(path)) && !sessionToken) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If user is logged in and tries to access login page, redirect to dashboard
-  if (pathname === '/login' && sessionCookie) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+  // Protect admin routes
+  if (ADMIN_ROUTES.some(path => pathname.startsWith(path))) {
+    if (!sessionToken) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    // In a real app, you would also verify the token has an 'admin' custom claim
   }
-
 
   return NextResponse.next();
 }
@@ -42,7 +36,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - / (the public homepage)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|$).*)',
   ],
 };

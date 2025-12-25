@@ -1,64 +1,69 @@
 'use server';
 import {
-  getAuth,
+  Auth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   User,
 } from 'firebase/auth';
-import {getFirebaseApp} from './firebase-config';
-import {doc, setDoc, getDoc, getFirestore} from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  getFirestore,
+  Firestore,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { Student } from './types';
 
-export async function signIn(email: string, password: string): Promise<User> {
-  const auth = getAuth(getFirebaseApp());
+export async function signIn(
+  auth: Auth,
+  email: string,
+  password: string
+): Promise<User> {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   return userCredential.user;
 }
 
-export async function signUp(email: string, password: string, name: string): Promise<User> {
-    const auth = getAuth(getFirebaseApp());
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+export async function signUp(
+  auth: Auth,
+  db: Firestore,
+  email: string,
+  password: string,
+  name: string
+): Promise<User> {
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+  const user = userCredential.user;
 
-    // Now, let's create a user document in Firestore
-    const db = getFirestore(getFirebaseApp());
-    const userRef = doc(db, 'students', user.uid);
+  const userProfileRef = doc(db, 'users', user.uid, 'profile', user.uid);
 
-    const newStudent = {
-      id: user.uid,
-      name: name,
-      email: user.email,
-      avatarUrl: `https://picsum.photos/seed/${user.uid}/100/100`,
-      avatarHint: 'student portrait',
-      points: 0,
-      dailyGoal: 64, // Default daily goal
-      currentIntake: 0,
-    };
+  const newUser: Omit<Student, 'id' | 'avatarUrl' | 'avatarHint' | 'points' | 'currentIntake'> & { createdAt: any, dailyGoal: number } = {
+    firstName: name.split(' ')[0] || '',
+    lastName: name.split(' ').slice(1).join(' ') || '',
+    email: user.email!,
+    studentId: user.uid, // Using UID as studentId
+    hydroPoints: 0,
+    dailyGoal: 64, // Default daily goal in oz
+    createdAt: serverTimestamp(),
+  };
 
-    await setDoc(userRef, newStudent);
+  setDoc(userProfileRef, newUser, { merge: true }).catch(async (serverError) => {
+    const permissionError = new FirestorePermissionError({
+      path: userProfileRef.path,
+      operation: 'create',
+      requestResourceData: newUser,
+    });
+    errorEmitter.emit('permission-error', permissionError);
+  });
 
-    return user;
+  return user;
 }
 
-
-export async function signOut() {
-  const auth = getAuth(getFirebaseApp());
+export async function signOut(auth: Auth) {
   return firebaseSignOut(auth);
-}
-
-export async function getCurrentUser() {
-    const auth = getAuth(getFirebaseApp());
-    return auth.currentUser;
-}
-
-export async function getUserProfile(userId: string) {
-    const db = getFirestore(getFirebaseApp());
-    const userRef = doc(db, 'students', userId);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-        return userSnap.data();
-    } else {
-        return null;
-    }
 }

@@ -27,9 +27,9 @@ export default function ChallengeCard({ user }: { user: Student }) {
       setIsLoading(true);
       setError(null);
       const result = await getChallengeAction({
-        studentName: user.name,
+        studentName: user.firstName,
         dailyGoal: user.dailyGoal,
-        currentPoints: user.points,
+        currentPoints: user.hydroPoints,
         pastChallenges: pastChallenges
       });
 
@@ -49,9 +49,11 @@ export default function ChallengeCard({ user }: { user: Student }) {
   };
 
   useEffect(() => {
-    fetchChallenge();
+    if(user){
+      fetchChallenge();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   return (
     <Card>
