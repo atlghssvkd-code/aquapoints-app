@@ -45,38 +45,37 @@ export default function SignUpForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      try {
-        await signUp(auth, firestore, values.email, values.password, values.name);
-        toast({
-          title: "Sign Up Successful",
-          description: "Your account has been created.",
-        });
-        router.push("/dashboard");
-      } catch (error) {
-        console.error("Sign up failed:", error);
-        let description = "An unexpected error occurred. Please try again.";
-        if (error instanceof FirebaseError) {
-            switch (error.code) {
-                case "auth/email-already-in-use":
-                    description = "This email address is already in use by another account.";
-                    break;
-                case "auth/weak-password":
-                    description = "The password is too weak. Please use a stronger password.";
-                    break;
-                case "auth/invalid-email":
-                    description = "The email address is not valid.";
-                    break;
-                default:
-                    description = "Failed to create an account. Please try again later.";
+    startTransition(() => {
+        signUp(auth, firestore, values.email, values.password, values.name).then(() => {
+            toast({
+              title: "Sign Up Successful",
+              description: "Your account has been created.",
+            });
+            router.push("/dashboard");
+        }).catch(error => {
+            console.error("Sign up failed:", error);
+            let description = "An unexpected error occurred. Please try again.";
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case "auth/email-already-in-use":
+                        description = "This email address is already in use by another account.";
+                        break;
+                    case "auth/weak-password":
+                        description = "The password is too weak. Please use a stronger password.";
+                        break;
+                    case "auth/invalid-email":
+                        description = "The email address is not valid.";
+                        break;
+                    default:
+                        description = "Failed to create an account. Please try again later.";
+                }
             }
-        }
-        toast({
-          variant: "destructive",
-          title: "Sign Up Failed",
-          description: description,
+            toast({
+              variant: "destructive",
+              title: "Sign Up Failed",
+              description: description,
+            });
         });
-      }
     });
   }
 

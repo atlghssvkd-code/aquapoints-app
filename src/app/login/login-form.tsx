@@ -42,37 +42,36 @@ export default function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      try {
-        await signIn(auth, values.email, values.password);
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-        router.push("/dashboard");
-      } catch (error) {
-        console.error("Login failed:", error);
-        let description = "Please check your email and password.";
-        if (error instanceof FirebaseError) {
-            switch(error.code) {
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                case 'auth/invalid-credential':
-                    description = "Invalid email or password.";
-                    break;
-                case 'auth/too-many-requests':
-                    description = "Too many login attempts. Please try again later.";
-                    break;
-                default:
-                    description = "An unexpected error occurred during login."
+    startTransition(() => {
+        signIn(auth, values.email, values.password).then(() => {
+            toast({
+                title: "Login Successful",
+                description: "Welcome back!",
+              });
+              router.push("/dashboard");
+        }).catch(error => {
+            console.error("Login failed:", error);
+            let description = "Please check your email and password.";
+            if (error instanceof FirebaseError) {
+                switch(error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        description = "Invalid email or password.";
+                        break;
+                    case 'auth/too-many-requests':
+                        description = "Too many login attempts. Please try again later.";
+                        break;
+                    default:
+                        description = "An unexpected error occurred during login."
+                }
             }
-        }
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description,
-        });
-      }
+            toast({
+              variant: "destructive",
+              title: "Login Failed",
+              description,
+            });
+        })
     });
   }
 

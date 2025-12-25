@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   User,
+  UserCredential,
 } from 'firebase/auth';
 import {
   doc,
@@ -33,7 +34,7 @@ export async function signUp(
   password: string,
   name: string
 ): Promise<User> {
-  const userCredential = await createUserWithEmailAndPassword(
+  const userCredential: UserCredential = await createUserWithEmailAndPassword(
     auth,
     email,
     password
@@ -52,6 +53,7 @@ export async function signUp(
     createdAt: serverTimestamp(),
   };
 
+  // Not awaiting this, letting it run in the background
   setDoc(userProfileRef, newUser, { merge: true }).catch(async (serverError) => {
     const permissionError = new FirestorePermissionError({
       path: userProfileRef.path,
@@ -59,6 +61,8 @@ export async function signUp(
       requestResourceData: newUser,
     });
     errorEmitter.emit('permission-error', permissionError);
+    // We might still want to throw the original error or handle it
+    throw serverError; 
   });
 
   return user;
