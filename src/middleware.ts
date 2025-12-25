@@ -1,30 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PROTECTED_ROUTES = ['/dashboard', '/leaderboard', '/map'];
-const ADMIN_ROUTES = ['/admin'];
-
+// No protected routes since there is no login
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const sessionToken = request.cookies.get('firebase-session-token');
-
-  // If user tries to access login page while logged in, redirect to dashboard
-  if (pathname.startsWith('/login') && sessionToken) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  // Protect student routes
-  if (PROTECTED_ROUTES.some(path => pathname.startsWith(path)) && !sessionToken) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Protect admin routes
-  if (ADMIN_ROUTES.some(path => pathname.startsWith(path))) {
-    if (!sessionToken) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    // In a real app, you would also verify the token has an 'admin' custom claim
-  }
-
   return NextResponse.next();
 }
 

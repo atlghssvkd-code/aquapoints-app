@@ -6,21 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { HydroStation } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection } from "firebase/firestore";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MOCK_HYDRO_STATIONS } from "@/lib/mock-data";
 
 export default function MapPage() {
     const mapImage = PlaceHolderImages.find(img => img.id === 'map');
-    const firestore = useFirestore();
-
-    const hydroStationsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return collection(firestore, 'hydro_stations');
-    }, [firestore]);
-
-    const { data: hydroStations, isLoading } = useCollection<HydroStation>(hydroStationsQuery);
-
+    const hydroStations: HydroStation[] = MOCK_HYDRO_STATIONS;
 
     const getStatusVariant = (status: 'Online' | 'Offline' | 'Error') => {
         switch (status) {
@@ -75,15 +65,7 @@ export default function MapPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {isLoading ? (
-                                Array.from({length: 5}).map((_, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                                        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (hydroStations || []).map(station => (
+                            {hydroStations.map(station => (
                                 <TableRow key={station.id}>
                                     <TableCell className="font-medium">{station.name}</TableCell>
                                     <TableCell>

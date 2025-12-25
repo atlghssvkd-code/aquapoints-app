@@ -13,11 +13,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collectionGroup, query, where, Timestamp } from "firebase/firestore";
 import { subDays, format, eachDayOfInterval } from "date-fns";
 import React from "react";
-import { Skeleton } from "../ui/skeleton";
+import { MOCK_HYDRATION_LOGS } from "@/lib/mock-data";
 
 const chartConfig = {
     total: {
@@ -31,27 +29,14 @@ const chartConfig = {
   };
   
 export default function HydrationTrendsChart() {
-    const firestore = useFirestore();
-    const sevenDaysAgo = subDays(new Date(), 7);
-
-    const trendsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
-        return query(
-            collectionGroup(firestore, 'hydration_records'),
-            where('timestamp', '>=', sevenDaysAgo)
-        );
-    }, [firestore, sevenDaysAgo]);
-
-    const { data: trendsData, isLoading } = useCollection(trendsQuery);
-
     const chartData = React.useMemo(() => {
         const last7Days = eachDayOfInterval({
           start: subDays(new Date(), 6),
           end: new Date(),
         });
     
-        const trendsByDay = (trendsData || []).reduce((acc, log: any) => {
-            const date = format(log.timestamp.toDate(), 'yyyy-MM-dd');
+        const trendsByDay = MOCK_HYDRATION_LOGS.reduce((acc, log: any) => {
+            const date = format(new Date(log.timestamp), 'yyyy-MM-dd');
             if (!acc[date]) {
                 acc[date] = 0;
             }
@@ -70,7 +55,7 @@ export default function HydrationTrendsChart() {
                 goal: campusGoal
             };
         });
-      }, [trendsData]);
+      }, []);
 
   return (
     <Card>
@@ -79,11 +64,6 @@ export default function HydrationTrendsChart() {
         <CardDescription>Daily water consumption across all students.</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-            <div className="h-64 w-full flex items-center justify-center">
-                <Skeleton className="h-full w-full" />
-            </div>
-        ) : (
             <ChartContainer config={chartConfig} className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                 <LineChart
@@ -127,7 +107,6 @@ export default function HydrationTrendsChart() {
                 </LineChart>
                 </ResponsiveContainer>
             </ChartContainer>
-        )}
       </CardContent>
     </Card>
   );

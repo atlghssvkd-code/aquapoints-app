@@ -14,11 +14,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, limit, where, Timestamp } from "firebase/firestore";
-import type { HydrationLog } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { eachDayOfInterval, format, subDays, startOfDay } from "date-fns";
+import { eachDayOfInterval, format, subDays } from "date-fns";
+import { MOCK_HYDRATION_LOGS } from "@/lib/mock-data";
 
 const chartConfig = {
   intake: {
@@ -32,19 +29,6 @@ const chartConfig = {
 };
 
 export default function WeeklyLogChart({ userId }: { userId: string }) {
-  const firestore = useFirestore();
-
-  const hydrationLogsQuery = useMemoFirebase(() => {
-    if (!userId || !firestore) return null;
-    const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
-    return query(
-      collection(firestore, 'users', userId, 'hydration_records'),
-      where('timestamp', '>=', Timestamp.fromDate(sevenDaysAgo)),
-      orderBy('timestamp', 'desc')
-    );
-  }, [firestore, userId]);
-
-  const { data: hydrationLogsData, isLoading } = useCollection<any>(hydrationLogsQuery);
 
   const weeklyData = React.useMemo(() => {
     const last7Days = eachDayOfInterval({
@@ -52,8 +36,8 @@ export default function WeeklyLogChart({ userId }: { userId: string }) {
       end: new Date(),
     });
 
-    const logsByDay = (hydrationLogsData || []).reduce((acc, log) => {
-        const date = format(log.timestamp.toDate(), 'yyyy-MM-dd');
+    const logsByDay = (MOCK_HYDRATION_LOGS || []).filter(log => log.userProfileId === userId).reduce((acc, log) => {
+        const date = format(new Date(log.timestamp), 'yyyy-MM-dd');
         if (!acc[date]) {
             acc[date] = 0;
         }
@@ -69,7 +53,7 @@ export default function WeeklyLogChart({ userId }: { userId: string }) {
             goal: 64 // Assuming a static goal for now
         };
     });
-  }, [hydrationLogsData]);
+  }, [userId]);
 
 
   return (
@@ -79,11 +63,6 @@ export default function WeeklyLogChart({ userId }: { userId: string }) {
         <CardDescription>Your water intake for the last 7 days.</CardDescription>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-            <div className="h-64 w-full flex items-center justify-center">
-                <Skeleton className="h-full w-full" />
-            </div>
-        ) : (
             <ChartContainer config={chartConfig} className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={weeklyData} margin={{ top: 20, right: 20, left: -10, bottom: 0 }}>
@@ -108,7 +87,6 @@ export default function WeeklyLogChart({ userId }: { userId: string }) {
                     </BarChart>
                 </ResponsiveContainer>
             </ChartContainer>
-        )}
       </CardContent>
     </Card>
   );

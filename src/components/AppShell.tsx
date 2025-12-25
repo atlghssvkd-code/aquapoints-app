@@ -19,11 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/icons/Logo";
-import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { signOut } from "@/lib/auth";
-import { doc } from "firebase/firestore";
 import { Student } from "@/lib/types";
-import { Skeleton } from "./ui/skeleton";
+import { MOCK_STUDENT_LEADERBOARD } from "@/lib/mock-data";
 
 export type NavItem = {
   href: string;
@@ -39,33 +36,17 @@ interface AppShellProps {
 export function AppShell({ children, navItems }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const auth = useAuth();
-  const firestore = useFirestore();
-  const { user, isUserLoading } = useUser();
 
   const isAdmin = pathname.startsWith('/admin');
-
-  const userProfileRef = useMemoFirebase(() => {
-    if (!user || isAdmin || !firestore) return null;
-    return doc(firestore, 'users', user.uid, 'profile', user.uid);
-  }, [firestore, user, isAdmin]);
-
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<Student>(userProfileRef);
+  const userProfile: Student = MOCK_STUDENT_LEADERBOARD[0]; // Mock user
 
   const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.push('/');
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+    router.push('/');
   };
 
   const getUserName = () => {
     if (isAdmin) return 'Admin';
-    if (isProfileLoading || isUserLoading) return 'Loading...';
     if (userProfile) return `${userProfile.firstName} ${userProfile.lastName}`;
-    if (user) return user.email;
     return 'Guest';
   };
   
@@ -76,7 +57,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
 
   const getAvatarFallback = () => {
       const name = getUserName();
-      if (name === 'Loading...' || name === 'Guest') return <UserIcon/>;
+      if (name === 'Guest') return <UserIcon/>;
       return name.charAt(0);
   }
 
@@ -110,14 +91,10 @@ export function AppShell({ children, navItems }: AppShellProps) {
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                {isUserLoading || isProfileLoading ? (
-                  <Skeleton className="h-8 w-8 rounded-full" />
-                ) : (
                   <>
                   <AvatarImage src={userProfile?.avatarUrl} alt={getUserName()} data-ai-hint={userProfile?.avatarHint} />
                   <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
                   </>
-                )}
               </Avatar>
               <div className="flex flex-col text-sm">
                 <span className="font-semibold">{getUserName()}</span>

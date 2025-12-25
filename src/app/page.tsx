@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/icons/Logo';
 
@@ -39,8 +38,8 @@ export default function Home() {
 
         <div className="flex justify-center">
             <Button asChild size="lg">
-                <Link href="/login">
-                    Login or Sign Up
+                <Link href="/dashboard">
+                    Go to Dashboard
                     <ArrowRight className="ml-2" />
                 </Link>
             </Button>
