@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const firestore = useFirestore();
 
   const userProfileRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid, 'profile', user.uid);
   }, [firestore, user]);
 
@@ -67,7 +67,7 @@ export default function DashboardPage() {
         {userProfile && <HydrationProgressCard user={userProfile} />}
         {userProfile && <ChallengeCard user={userProfile} />}
         <div className="lg:col-span-2">
-          <WeeklyLogChart />
+          {user && <WeeklyLogChart userId={user.uid} />}
         </div>
         {userProfile && <TipsCard user={userProfile} />}
       </div>

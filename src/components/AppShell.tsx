@@ -46,7 +46,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
   const isAdmin = pathname.startsWith('/admin');
 
   const userProfileRef = useMemoFirebase(() => {
-    if (!user || isAdmin) return null;
+    if (!user || isAdmin || !firestore) return null;
     return doc(firestore, 'users', user.uid, 'profile', user.uid);
   }, [firestore, user, isAdmin]);
 

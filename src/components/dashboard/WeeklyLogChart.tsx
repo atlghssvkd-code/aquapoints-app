@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import {
   Card,
@@ -13,11 +14,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, limit, where, Timestamp } from "firebase/firestore";
 import type { HydrationLog } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { eachDayOfInterval, format, subDays } from "date-fns";
+import { eachDayOfInterval, format, subDays, startOfDay } from "date-fns";
 
 const chartConfig = {
   intake: {
@@ -30,18 +31,18 @@ const chartConfig = {
   }
 };
 
-export default function WeeklyLogChart() {
-  const { user } = useUser();
+export default function WeeklyLogChart({ userId }: { userId: string }) {
   const firestore = useFirestore();
 
   const hydrationLogsQuery = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!userId || !firestore) return null;
+    const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
     return query(
-      collection(firestore, 'users', user.uid, 'hydration_records'),
-      orderBy('timestamp', 'desc'),
-      limit(7)
+      collection(firestore, 'users', userId, 'hydration_records'),
+      where('timestamp', '>=', Timestamp.fromDate(sevenDaysAgo)),
+      orderBy('timestamp', 'desc')
     );
-  }, [firestore, user]);
+  }, [firestore, userId]);
 
   const { data: hydrationLogsData, isLoading } = useCollection<any>(hydrationLogsQuery);
 
