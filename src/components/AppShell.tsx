@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, LayoutDashboard, Map, Trophy, Shield } from "lucide-react";
+import { LogOut } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -36,6 +36,11 @@ export function AppShell({ children, navItems }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const isAdmin = pathname.startsWith('/admin');
+  const userName = isAdmin ? 'Admin' : currentUser.name;
+  const userRole = isAdmin ? 'Administrator' : 'Student';
+
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -66,12 +71,12 @@ export function AppShell({ children, navItems }: AppShellProps) {
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />
-                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                {!isAdmin && <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint={currentUser.avatarHint} />}
+                <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col text-sm">
-                <span className="font-semibold">{currentUser.name}</span>
-                <span className="text-muted-foreground text-xs">Student</span>
+                <span className="font-semibold">{userName}</span>
+                <span className="text-muted-foreground text-xs">{userRole}</span>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
