@@ -25,7 +25,6 @@ export type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
-  match?: (pathname: string) => boolean;
 };
 
 interface AppShellProps {
@@ -52,11 +51,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={
-                    item.match
-                      ? item.match(pathname)
-                      : pathname.startsWith(item.href)
-                  }
+                  isActive={item.href === '/dashboard' ? pathname === item.href : pathname.startsWith(item.href)}
                 >
                   <Link href={item.href}>
                     {item.icon}

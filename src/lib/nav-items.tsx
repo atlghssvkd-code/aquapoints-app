@@ -6,7 +6,6 @@ export const studentNavItems: NavItem[] = [
     href: "/dashboard",
     label: "Dashboard",
     icon: <LayoutDashboard />,
-    match: (pathname) => pathname === "/dashboard",
   },
   {
     href: "/map",
@@ -25,7 +24,6 @@ export const adminNavItems: NavItem[] = [
       href: "/admin",
       label: "Dashboard",
       icon: <Shield />,
-      match: (pathname) => pathname === "/admin",
     },
   ];
   
