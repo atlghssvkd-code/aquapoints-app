@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard, Map, Trophy, Shield } from "lucide-react";
 import {
   SidebarProvider,
   Sidebar,
@@ -19,8 +19,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/icons/Logo";
-import { type NavItem } from "@/lib/nav-items";
 import { currentUser } from "@/lib/data";
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  match?: (pathname: string) => boolean;
+};
 
 interface AppShellProps {
   children: React.ReactNode;

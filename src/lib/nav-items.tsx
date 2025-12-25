@@ -1,11 +1,5 @@
-import { LayoutDashboard, Map, Trophy, User, Users, Shield } from "lucide-react";
-
-export type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  match?: (pathname: string) => boolean;
-};
+import { LayoutDashboard, Map, Trophy, Shield } from "lucide-react";
+import type { NavItem } from "@/components/AppShell";
 
 export const studentNavItems: NavItem[] = [
   {
