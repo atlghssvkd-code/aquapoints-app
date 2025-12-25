@@ -3,6 +3,9 @@
 import { generateHydrationChallenge, HydrationChallengeInput } from "@/ai/flows/generate-hydration-challenge";
 import { getPersonalizedHydrationTips, PersonalizedHydrationTipsInput } from "@/ai/flows/personalized-hydration-tips";
 
+// Note: These actions are not currently used as the app is in a static state.
+// They are kept for potential future re-integration with AI services.
+
 export async function getChallengeAction(input: HydrationChallengeInput) {
   try {
     const result = await generateHydrationChallenge(input);
