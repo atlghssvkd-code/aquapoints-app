@@ -38,7 +38,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
   const router = useRouter();
 
   const isAdmin = pathname.startsWith('/admin');
-  const userProfile: Student = MOCK_STUDENT_LEADERBOARD[0]; // Mock user
+  const userProfile: Student | undefined = MOCK_STUDENT_LEADERBOARD[0]; // Mock user
 
   const handleSignOut = async () => {
     router.push('/');
